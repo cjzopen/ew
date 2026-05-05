@@ -146,10 +146,10 @@ def main():
             
         html_content = template.replace('{{VIDEO_DATA}}', json.dumps(video_data_list, ensure_ascii=False))
         
-        with open('index.html', 'w', encoding='utf-8') as f:
+        with open('ai.html', 'w', encoding='utf-8') as f:
             f.write(html_content)
         
-        print("Done! Generated index.html")
+        print("Done! Generated ai.html")
         
     except Exception as e:
         print(f"An error occurred: {e}")
