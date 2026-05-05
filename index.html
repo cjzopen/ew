@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>YouTube SEO Description Generator</title>
+  <style>body{font-family:system-ui,-apple-system,sans-serif;margin:0;padding:20px;background:#f5f5f5}header{background:#fff;padding:20px;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.1);margin-bottom:20px}input[type="password"]{padding:8px;width:300px;border:1px solid #ccc;border-radius:4px}.video-card{background:#fff;padding:20px;margin-bottom:20px;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.1)}.video-title{margin-top:0;color:#333}.details{display:flex;gap:20px;margin-bottom:15px}.col{flex:1}.col textarea{width:100%;height:150px;padding:8px;border:1px solid #ccc;border-radius:4px;box-sizing:border-box;resize:vertical}button{background:#1a73e8;color:#fff;border:none;padding:10px 20px;border-radius:4px;cursor:pointer;font-size:16px}button:hover{background:#1557b0}button:disabled{background:#ccc;cursor:not-allowed}.ai-output{margin-top:15px;padding:15px;background:#e8f0fe;border-radius:4px;white-space:pre-wrap;display:none}.loading{color:#666;font-style:italic;display:none}</style>
+</head>
+<body>
+  <header>
+    <h1>YouTube SEO Description Generator</h1>
+    <div>
+      <label for="apiKey">Gemini API Key: </label>
+      <input type="password" id="apiKey" placeholder="Enter your Gemini API Key">
+    </div>
+  </header>
+  <div id="videoContainer"></div>
+
+  <script>
+    const digiwinProducts = `
+鼎新數智提供涵蓋企業成長各階段的數位化與智能產品解決方案：
+1. 企業 AI: 企業AI助理, AI私有部署, AI知識庫 ChatFile, METIS 平台
+2. ERP系統: T100 ERP (集團大型), Workflow ERP GP (中大型製造), Cosmos ERP (中大型流通), SmartERP (中小企業), A1商務應用雲
+3. ERPⅡ 管理延展應用: EasyFlow BPM (流程管理), BI (商業智慧), CRM (客戶關係), HR (人力資源), POS (銷售點), EAI (整合應用), 財務管理系統, 進銷存管理系統
+4. 智能與OT應用: 廠內智能物流, PLM (產品生命週期), APS (智能排程), MES (製造執行), sFWR (數智工廠戰情室), 機聯網APP, 能源管理APP, 碳盤查
+5. 雲端平台與服務: 鼎新ESG數位服務平台, 營運監控雲平台, 鼎新雲市場, 鼎新服務雲, 資訊委外, 鼎新企業醫生
+6. 企業資安: 資安風險評估, 資安檢測, ISO27001顧問
+`;
+
+    const videoData = [{"id": "sUog-a0UBnA", "title": "【中小企業補給站】EP1.業務不缺工：24小時AI訂單捕手", "description": "#關稅 #製造業 #產業供應鏈 #國際貿易 #AIAGENT #AI #AIGP #鼎新\n\n這場專為高階決策者、幕僚與 IT 主管設計的線上精華講座，將直擊 AI 落地效益： 營運升級： 讓 AI 自主執行複雜工作流，徹底釋放人力。 決策賦能： 深度解析營運數據與風險，大幅縮短決策週期。 IT 轉型： 讓 IT 從單純維運，進化為驅動獲利的 AI 策略引擎。 我們將剖析多個真實落地案例。線上參與，彈性高效無負擔！ 誠摯邀請您撥冗上線，用最短時間掌握企業彎道超車的關鍵捷徑。 4/16起周四 線上專題主講 對痛解析 讓我們AI致勝!\n\n▼▼▼後續場次報名連結▼▼▼\nhttps://www.digiknow.com.tw/activity/51b861ea85114\n線上活動： \n04/23(四)15:00     EP1. 業務不缺工：24小時AI訂單捕手\n05/07(四)15:00     EP2. 合規自動化：數位溯源守住獲利防線\n05/21(四)15:00     EP3. 現場不缺工：機聯網透明排產術\n06/04(四)15:00     EP4. 產能倍增術：告別批號地獄\n06/18(四)15:00     EP5. 遠端智管場：AI監控穩守30%毛利\n⭐因每集內容與講師皆不同，故「並非」每集皆有精華講義，敬請知悉。\n⭐報名成功將收到報名成功回函，並提供觀看連結網址到您的電子信箱與手機簡訊，煩請留意接收。\n⭐主辦單位保有客戶報名成功與否和最終修改節目議程與講師之權利，並對活動保留最終解釋權。\n✰註冊就享知，產業新知不漏接\n【訂閱頻道＆下載白皮書】\n▶️鼎新社群\nhttps://linkby.tw/digiwin1982\n✰註冊就享知，產業新知不漏接\n【訂閱頻道＆下載白皮書】\n中小企業補給站：https://www.digiknow.com.tw/channel/61528c3e19368", "subtitles": "影片超過20分鐘，系統設定不抓取字幕以節省 Token。"}, {"id": "IwflPDbhRPM", "title": "中小企業補給站-建構中小獲利的「案例思維」", "description": "#關稅 #製造業 #產業供應鏈 #國際貿易 #AIAGENT #AI #AIGP #鼎新\n\n這場專為高階決策者、幕僚與 IT 主管設計的線上精華講座，將直擊 AI 落地效益： 營運升級： 讓 AI 自主執行複雜工作流，徹底釋放人力。 決策賦能： 深度解析營運數據與風險，大幅縮短決策週期。 IT 轉型： 讓 IT 從單純維運，進化為驅動獲利的 AI 策略引擎。 我們將剖析多個真實落地案例。線上參與，彈性高效無負擔！ 誠摯邀請您撥冗上線，用最短時間掌握企業彎道超車的關鍵捷徑。 4/16起周四 線上專題主講 對痛解析 讓我們AI致勝!\n\n▼▼▼後續場次報名連結▼▼▼\nhttps://www.digiknow.com.tw/activity/51b861ea85114\n線上活動： \n04/16(四)15:00      EP0：中小企業補給站-建構中小獲利的「案例思維」\n04/23(四)15:00      EP1：企業的訂單洪流：LINE訊息接不完？靠「Line Buy」打造智慧接單系統\n05/07(四)15:00      EP2：公司的護城河：法規地雷連環爆？靠「數位溯源」打造最強防禦力\n05/21(四)15:00      EP3：企業獲利黑洞：別讓「亂報價」與「售後黑洞」吃掉你的利潤\n06/04(四)15:00      EP4：企業金礦學：告別混亂批號！BOM 模組優化讓生產效率翻倍的秘密\n06/18(四)15:00      EP5：企業生存戰：揭開案場進度不失控、毛利穩守 30% 的管理密技\n⭐因每集內容與講師皆不同，故「並非」每集皆有精華講義，敬請知悉。\n⭐報名成功將收到報名成功回函，並提供觀看連結網址到您的電子信箱與手機簡訊，煩請留意接收。\n⭐主辦單位保有客戶報名成功與否和最終修改節目議程與講師之權利，並對活動保留最終解釋權。\n✰註冊就享知，產業新知不漏接\n【訂閱頻道＆下載白皮書】\n▶️鼎新社群\nhttps://linkby.tw/digiwin1982\n✰註冊就享知，產業新知不漏接\n【訂閱頻道＆下載白皮書】\n中小企業補給站：https://www.digiknow.com.tw/channel/61528c3e19368 \n\n#鼎新數智 #用數智實現創想 #智慧工作樂享生活", "subtitles": "影片超過20分鐘，系統設定不抓取字幕以節省 Token。"}, {"id": "cgES71N9TVQ", "title": "【資安知識+】從稽核視角看 AI攻擊下的漏洞優先級與資安債管理", "description": "有任何與報名或收視連結相關問題，請加入line帳號：@065vuhrb\n或點擊https://reurl.cc/V4AAxA\n\n※提醒有進入報名連結或是填寫報名表單，且報名成功後，才會收到報名成功回條\n從稽核視角看 AI攻擊下的漏洞優先級與資安債管理\n\nAI 駭客已經 24 小時不間斷、全自動搜尋企業漏洞時，您的漏洞修補還在靠「人力手動」與「年度檢測」嗎？\n\n在 2026 年的極速漏洞時代，IT 面臨的不再是技術問題，而是「資源與時間的生存賽」。面對動輒上千條的檢測報告，我們都知道「全部補完」是不可能的任務，但「稽核底線」與「供應鏈資安要求」卻步步進逼，讓企業陷入不敢停機卻又怕被駭的兩難。\n\n我們將在這場活動和您分享：\n\n精準挑重點： 拋棄「分數高就先補」的舊思維，教你如何看穿駭客現在最愛打哪一種洞，把有限的人力精準投放在最關鍵的命脈上。\n\n掌握新節奏： 破解「一年測兩次」的過期迷思，分享如何建立一套「平時自動監控、關鍵時刻才測」的實戰頻率，不再為了應付稽核而做虛功。\n\n轉譯術解套： 把讓老闆聽不懂的技術漏洞，轉化為公司「會賠多少錢」的風險評估。教你如何用老闆聽得懂的語言，換取應有的預算與支持。\n\n【議程】\n\n1. 資安漏洞無限增生，企業應如何掌握關鍵資產及修補策略\n2.AI全天候掃描漏洞，執行檢測的關鍵時機與頻率實務探討 3. 欲修補卻無所適從？將技術漏洞轉譯為高層懂的財務風險\n\n【活動講師】\n張永承 ｜鼎新數智IT經理\n\n【問卷】\n\nStep1：04/15 (三) 下午15:00後，再次點選今日活動前提供的直播網址即可填寫問卷\nStep2：完成後即可收到簡報講義\n\n※訂閱頻道追蹤最新影片：http://pcse.pw/5X8HR 【鼎新數智】\n\n【鼎新數智】\n▶️資安官網： https://techops.digiwin.com/\n▶️鼎新社群：https://linkby.tw/digiwin1982", "subtitles": "影片超過20分鐘，系統設定不抓取字幕以節省 Token。"}, {"id": "s3Tj4yp6hxE", "title": "餐飲業缺工有解 數據化運營讓營收增長！  #德克士", "description": "出類拔「脆」的德克士，對於食材的品質與安全層層把關，一心提供顧客最優質的餐點！\n來看看張柏嘉 總經理是如何率領德克士團隊，讓報廢減少50%、人力成本降低3%吧！", "subtitles": ""}, {"id": "hycjpVF_SpA", "title": "【資安知識+】「2026 供應鏈資安趨勢」從國際合規驗證到企業營運韌性強化", "description": "有任何與報名或收視連結相關問題，請加入line帳號：@065vuhrb\n或點擊https://reurl.cc/V4AAxA\n※提醒有進入報名連結或是填寫報名表單，且報名成功後，才會收到報名成功回條\n\n「2026 供應鏈資安趨勢」從國際合規驗證到企業營運韌性強化\n\n2026 年，台灣廠商在 AI 伺服器、半導體供應鏈（材料、檢測、廠務）、車用電子及自動化製造等利好產業中展現強大競爭力。然而，隨著訂單紅利而來的是更嚴苛的商業規則：大廠（如 台積電、輝達體系、歐系車廠）的稽核方式已從早期的書面問卷，演進為現場實測與動態漏洞探測，資安表現已直接與「接單資格」掛鉤。\n\n為了協助企業在搶攻市場的同時，排除阻礙營收的資安變數，我們利用 40 分鐘的線上分享，與您解析 2026 年供應鏈環境的實質轉變。我們將從大廠動態稽核的應對邏輯出發，談到跨廠協作中的技術資產保全，最後聚焦於 AI 自動化攻擊下的產線韌性，確保您的企業在產能爆發期，依然具備快速合規與不斷鏈的實力。\n\n【議程】\n1. 資安稽核力道升級，掌握合規實務的關鍵必修課\n2. 潛伏威脅升級下的監控盲區，以零信任架構打造防洩密邊界 3. 應對 AI 自動化攻擊，打造企業韌性的生存框架\n\n【活動講師】\n江有泰 ｜貝爾國際驗證機構 總經理\n林崇裕 ｜鼎新數智 資深資安顧問\n\n\n【問卷】\nStep1：03/19 (四) 下午15:00後，再次點選今日活動前提供的直播網址即可填寫問卷\nStep2：完成後即可收到簡報講義\n\n※訂閱頻道追蹤最新影片：http://pcse.pw/5X8HR\n\n【鼎新數智】\n▶️資安官網： https://techops.digiwin.com/\n▶️鼎新社群：https://linkby.tw/digiwin1982", "subtitles": "影片超過20分鐘，系統設定不抓取字幕以節省 Token。"}];
+    
+    function renderVideos() {
+      const container = document.getElementById('videoContainer');
+      videoData.forEach((video, index) => {
+        const card = document.createElement('div');
+        card.className = 'video-card';
+        card.innerHTML = `
+          <h2 class="video-title"><a href="https://www.youtube.com/watch?v=${video.id}" target="_blank">${video.title}</a></h2>
+          <div class="details">
+            <div class="col">
+              <strong>原 Description:</strong>
+              <textarea readonly>${video.description}</textarea>
+            </div>
+            <div class="col">
+              <strong>字幕 (Subtitles):</strong>
+              <textarea readonly>${video.subtitles || '無可用字幕'}</textarea>
+            </div>
+          </div>
+          <button id="btn-${index}" onclick="generateSEO(${index})">✨ AI 建議</button>
+          <div id="loading-${index}" class="loading">Gemini 正在產生中...請稍候</div>
+          <div id="output-${index}" class="ai-output"></div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    async function generateSEO(index) {
+      const apiKey = document.getElementById('apiKey').value.trim();
+      if (!apiKey) {
+        alert('請先輸入 Gemini API Key');
+        return;
+      }
+
+      const btn = document.getElementById(`btn-${index}`);
+      const loading = document.getElementById(`loading-${index}`);
+      const output = document.getElementById(`output-${index}`);
+      const video = videoData[index];
+
+      btn.disabled = true;
+      loading.style.display = 'block';
+      output.style.display = 'none';
+
+      const prompt = `
+你是一位專業的 SEO 專家與行銷企劃。我們是「鼎新數智 (Digiwin)」，我們有以下的產品與服務：
+${digiwinProducts}
+
+現在有一支我們的 YouTube 影片需要優化 Description。
+【影片標題】：${video.title}
+【原始說明】：${video.description}
+【影片字幕】：${video.subtitles.substring(0, 15000)}
+
+請幫我重新撰寫一段「SEO 友好」的 YouTube 影片說明 (Description)，請遵循以下規則：
+1. 結合原有的 description 內容（保留重要連結與資訊），並加上適合搜尋引擎的關鍵字，讓語氣更通順吸引人。
+2. 判斷影片內容（標題、說明、字幕）是否有跟上述「鼎新數智產品」相關。如果有可以延伸帶到的產品或服務，請在 description 中自然地提及並說明該產品如何幫助解決問題；若沒有關聯，則單純以影片內容為主產生 description，不用硬塞產品。
+3. 排版需易讀，可適度使用 emoji 與條列式重點。
+4. 請直接輸出最終要放上 YouTube 的 description，不需輸出其他寒暄對話。
+`;
+
+      try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }]
+          })
+        });
+
+        const data = await response.json();
+        if (data.error) {
+          throw new Error(data.error.message);
+        }
+
+        const generatedText = data.candidates[0].content.parts[0].text;
+        output.textContent = generatedText;
+        output.style.display = 'block';
+      } catch (err) {
+        alert('API 呼叫失敗: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        loading.style.display = 'none';
+      }
+    }
+
+    window.onload = renderVideos;
+  </script>
+</body>
+</html>
