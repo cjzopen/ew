@@ -298,18 +298,20 @@ function checkTimestamps(desc, durationSec) {{
 }}
 
 async function callGemini(title, desc, tags) {{
+  const tagList = (tags || []);
+  const tagDisplay = tagList.length > 0 ? tagList.join('、') : '（無）';
   const prompt = `你是 YouTube 頻道內容品質評估專家，專門評估企業軟體教學影片的 AI 友善度。
 
 標題：${{title}}
 說明（前500字）：${{desc.slice(0, 500)}}
-標籤：${{(tags || []).join('、') || '（無）'}}
+標籤（共 ${{tagList.length}} 個，以下是完整清單，請勿假設清單以外的標籤存在）：${{tagDisplay}}
 
 只回傳 JSON，不要其他文字：
 {{"title_desc_score":數字,"title_desc_tip":"建議或null","tags_score":數字,"tags_tip":"建議或null"}}
 
 評分標準（嚴格）：
 - 標題＋說明（0~70分）：主題具體性、是否說明產品名稱／功能／使用情境、觀眾能否快速判斷值不值得看、AI 能否充分理解影片在教什麼
-- 標籤（0~20分）：與內容相關性、有無具體產品名與功能關鍵字、是否過於籠統或缺漏
+- 標籤（0~20分）：只根據上方提供的實際標籤清單評分，與內容相關性、有無具體產品名與功能關鍵字、是否過於籠統或缺漏
 
 tip 若無建議填 null，否則一句繁體中文改善建議。`;
 
@@ -320,7 +322,7 @@ tip 若無建議填 null，否則一句繁體中文改善建議。`;
       headers: {{'Content-Type': 'application/json'}},
       body: JSON.stringify({{
         contents: [{{parts: [{{text: prompt}}]}}],
-        generationConfig: {{responseMimeType: 'application/json', temperature: 0.2}}
+        generationConfig: {{responseMimeType: 'application/json', temperature: 1.0}}
       }})
     }}
   );

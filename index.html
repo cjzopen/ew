@@ -11,7 +11,7 @@
 <div class="container">
   <header class="page-header">
     <h1>Channel Dashboard</h1>
-    <p class="update-time">最後更新：2026-05-06 16:44:07</p>
+    <p class="update-time">最後更新：2026-05-06 17:47:56</p>
   </header>
 
   <nav class="toolbar">
@@ -337,13 +337,13 @@ Step2：完成後即可收到簡報講義
         <button class="analyze-btn" id="btn-hycjpVF_SpA" onclick="analyzeVideo('hycjpVF_SpA')">AI 分析</button>
       </div>
     </div>
-    <div class="card" data-id="rjVo6MGniiw" data-channel="@DATASYStw" data-date="2026-03-19" data-views="506" data-likes="6" data-comments="1" data-duration="1313" data-score="">
+    <div class="card" data-id="rjVo6MGniiw" data-channel="@DATASYStw" data-date="2026-03-19" data-views="511" data-likes="6" data-comments="1" data-duration="1313" data-score="">
       <div class="card-header">
         <h2 class="card-title"><a href="https://www.youtube.com/watch?v=rjVo6MGniiw" target="_blank">不進則退 | AI變革下，企業生存戰略與營運韌性加速器</a></h2>
         <div class="stats">
           <span class="stat-badge">📅 2026-03-19</span>
           <span class="stat-badge">⏱ 21:53</span>
-          <span class="stat-badge">▶ 506</span>
+          <span class="stat-badge">▶ 511</span>
           <span class="stat-badge">👍 6</span>
           <span class="stat-badge">💬 1</span>
           <span class="score-badge" id="score-rjVo6MGniiw" style="display:none"></span>
@@ -4213,13 +4213,13 @@ https://linkby.tw/digiwin1982</p>
         <button class="analyze-btn" id="btn-Uzcf4AFGj3g" onclick="analyzeVideo('Uzcf4AFGj3g')">AI 分析</button>
       </div>
     </div>
-    <div class="card" data-id="wDjVTc-sSLg" data-channel="@DATASYStw" data-date="2025-04-11" data-views="1903" data-likes="8" data-comments="0" data-duration="521" data-score="">
+    <div class="card" data-id="wDjVTc-sSLg" data-channel="@DATASYStw" data-date="2025-04-11" data-views="1906" data-likes="8" data-comments="0" data-duration="521" data-score="">
       <div class="card-header">
         <h2 class="card-title"><a href="https://www.youtube.com/watch?v=wDjVTc-sSLg" target="_blank">從「拒修」到「品質保證」，台灣自行車的創新之路</a></h2>
         <div class="stats">
           <span class="stat-badge">📅 2025-04-11</span>
           <span class="stat-badge">⏱ 8:41</span>
-          <span class="stat-badge">▶ 1,903</span>
+          <span class="stat-badge">▶ 1,906</span>
           <span class="stat-badge">👍 8</span>
           <span class="stat-badge">💬 0</span>
           <span class="score-badge" id="score-wDjVTc-sSLg" style="display:none"></span>
@@ -20747,13 +20747,13 @@ Step2：完成後即可收到簡報講義
         <button class="analyze-btn" id="btn-BZr53_xhmjc" onclick="analyzeVideo('BZr53_xhmjc')">AI 分析</button>
       </div>
     </div>
-    <div class="card" data-id="D9Ey8V_UyZU" data-channel="@DATASYStw" data-date="2023-03-03" data-views="1373" data-likes="14" data-comments="1" data-duration="1797" data-score="">
+    <div class="card" data-id="D9Ey8V_UyZU" data-channel="@DATASYStw" data-date="2023-03-03" data-views="1374" data-likes="14" data-comments="1" data-duration="1797" data-score="">
       <div class="card-header">
         <h2 class="card-title"><a href="https://www.youtube.com/watch?v=D9Ey8V_UyZU" target="_blank">中小企業ESG怎麼做? 環保認證懶人包看過來《產業心時刻》EP8</a></h2>
         <div class="stats">
           <span class="stat-badge">📅 2023-03-03</span>
           <span class="stat-badge">⏱ 29:57</span>
-          <span class="stat-badge">▶ 1,373</span>
+          <span class="stat-badge">▶ 1,374</span>
           <span class="stat-badge">👍 14</span>
           <span class="stat-badge">💬 1</span>
           <span class="score-badge" id="score-D9Ey8V_UyZU" style="display:none"></span>
@@ -21277,18 +21277,20 @@ function checkTimestamps(desc, durationSec) {
 }
 
 async function callGemini(title, desc, tags) {
+  const tagList = (tags || []);
+  const tagDisplay = tagList.length > 0 ? tagList.join('、') : '（無）';
   const prompt = `你是 YouTube 頻道內容品質評估專家，專門評估企業軟體教學影片的 AI 友善度。
 
 標題：${title}
 說明（前500字）：${desc.slice(0, 500)}
-標籤：${(tags || []).join('、') || '（無）'}
+標籤（共 ${tagList.length} 個，以下是完整清單，請勿假設清單以外的標籤存在）：${tagDisplay}
 
 只回傳 JSON，不要其他文字：
 {"title_desc_score":數字,"title_desc_tip":"建議或null","tags_score":數字,"tags_tip":"建議或null"}
 
 評分標準（嚴格）：
 - 標題＋說明（0~70分）：主題具體性、是否說明產品名稱／功能／使用情境、觀眾能否快速判斷值不值得看、AI 能否充分理解影片在教什麼
-- 標籤（0~20分）：與內容相關性、有無具體產品名與功能關鍵字、是否過於籠統或缺漏
+- 標籤（0~20分）：只根據上方提供的實際標籤清單評分，與內容相關性、有無具體產品名與功能關鍵字、是否過於籠統或缺漏
 
 tip 若無建議填 null，否則一句繁體中文改善建議。`;
 
@@ -21299,7 +21301,7 @@ tip 若無建議填 null，否則一句繁體中文改善建議。`;
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
         contents: [{parts: [{text: prompt}]}],
-        generationConfig: {responseMimeType: 'application/json', temperature: 0.2}
+        generationConfig: {responseMimeType: 'application/json', temperature: 1.0}
       })
     }
   );
