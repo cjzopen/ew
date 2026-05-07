@@ -20,7 +20,7 @@ function getCacheKey(vid) {
 async function callGemini(title, desc, tags, durationSec) {
   const tagList = (tags || []);
   const tagDisplay = tagList.length > 0 ? tagList.join('、') : '（無）';
-  const prompt = `你是 YouTube 頻道內容品質評估專家，專門評估企業軟體教學影片的 AI 友善度。
+  const prompt = `你是 YouTube 頻道內容品質評估專家，專門評估 B2B 企業頻道影片（如產品介紹、解決方案、客戶案例、研討會或教學等）的 AI 友善度與觀眾體驗。
 
 影片長度：${Math.floor(durationSec / 60)}分${durationSec % 60}秒
 標題：${title}
