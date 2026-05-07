@@ -19,14 +19,44 @@ function getCacheKey(vid) {
 
 function checkTimestamps(desc, durationSec) {
   if (durationSec <= 180) return {score: null, tip: null};
-  const m = [...desc.matchAll(/\b(\d{1,2}):(\d{2})(?::(\d{2}))?\b/g)];
-  if (!m.length) return {score: 0, tip: '影片超過3分鐘，建議在說明中加入時間戳以提升觀眾體驗'};
-  const first = m[0];
+  
+  const lines = desc.split('\n');
+  const timestamps = [];
+  for (const line of lines) {
+    const match = line.match(/(?:^|\s)(\d{1,2}):(\d{2})(?::(\d{2}))?\b(.*)/);
+    if (match) timestamps.push(match);
+  }
+
+  if (!timestamps.length) return {score: 0, tip: '影片超過3分鐘，建議在說明中加入時間戳以提升觀眾體驗'};
+  
+  const first = timestamps[0];
   const total = first[3] !== undefined
     ? parseInt(first[1]) * 3600 + parseInt(first[2]) * 60 + parseInt(first[3])
     : parseInt(first[1]) * 60 + parseInt(first[2]);
   if (total !== 0) return {score: 5, tip: '第一個時間戳必須從 0:00（或 00:00、0:00:00）開始，才能觸發 YouTube 章節功能'};
-  return {score: 10, tip: null};
+
+  let tip = null;
+  let score = 10;
+
+  if (/\b\d{1,2}:\d{2}(?::\d{2})?\s*[~-]\s*\d{1,2}:\d{2}(?::\d{2})?\b/.test(desc)) {
+    tip = '時間戳只需要標示起始時間即可，不需要使用「~」或「-」標示結束時間';
+    score -= 5;
+  }
+
+  for (const match of timestamps) {
+    const text = match[4].replace(/^[~\-\s]*\d{1,2}:\d{2}(?::\d{2})?/, '').replace(/^[~\-\s]+/, '').trim();
+    if (/(精彩內容|精彩畫面|精彩片段)/.test(text) || /^(摘要|重點|內容摘要|重點摘要|段落摘要|介紹|重點介紹|大綱)$/.test(text)) {
+      if (!tip) {
+        tip = `時間戳的描述「${text}」過於籠統，請改用具體說明該段落重點的文字`;
+      } else {
+        tip += `；且描述「${text}」過於籠統，請改用具體重點`;
+      }
+      score -= 5;
+      break;
+    }
+  }
+
+  return {score: Math.max(0, score), tip: tip};
 }
 
 async function callGemini(title, desc, tags) {
