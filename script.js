@@ -20,12 +20,11 @@ function getCacheKey(vid) {
 async function callGemini(title, desc, tags, durationSec) {
   const tagList = (tags || []);
   const tagDisplay = tagList.length > 0 ? tagList.join('、') : '（無）';
-  const prompt = `你是 YouTube 頻道內容品質評估專家，專門評估 B2B 企業頻道影片（如產品介紹、解決方案、客戶案例、研討會或教學等）的 AI 友善度與觀眾體驗。
+  const prompt = `你是 YouTube 頻道內容品質評估專家，專門評估 B2B 企業頻道影片（如產品介紹、解決方案、客戶案例、研討會或教學等）的SEO與觀眾體驗。
 
 影片長度：${Math.floor(durationSec / 60)}分${durationSec % 60}秒
 標題：${title}
-說明：
-${desc}
+說明：${desc}
 
 標籤（共 ${tagList.length} 個，請勿假設清單以外的標籤存在）：${tagDisplay}
 
@@ -35,8 +34,8 @@ ${desc}
 {"title_score":數字,"title_tip":"建議或null","desc_score":數字,"desc_tip":"建議或null","tags_score":數字,"tags_tip":"建議或null","timestamps_score":數字,"timestamps_tip":"建議或null"}
 
 評分標準（嚴格）：
-- 標題（0~30分）：是否具體、包含產品名稱或明確主題，觀眾能否快速判斷重點。
-- 說明（0~40分）：是否補充影片背景、情境、功能介紹，AI 能否充分理解影片在教什麼。
+- 標題（0~30分）：是否具體、包含明確主題，觀眾能否快速判斷重點。
+- 說明（0~40分）：是否補充影片背景、情境、產品或解決方案介紹，觀眾與 AI 能否充分理解影片的重點與價值。
 - 標籤（0~20分）：只根據提供的清單評分，與內容相關性、有無具體產品名與功能關鍵字。
 - 時間戳記（0~10分）：影片超過3分鐘建議要有時間戳。若有時間戳：(1)第一個必須從 0:00 或 00:00 開始 (2)只需標示起始時間，不應標示範圍結束時間 (3)描述必須具體，不可用「精彩內容/摘要/重點」等籠統詞 (4)描述不可過長，以免對UI不友善或無法觸發章節。違反上述請扣分並給具體建議。若小於3分鐘且無時間戳，請給滿分10分且 tip 為 null。
 
