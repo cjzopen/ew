@@ -14,38 +14,32 @@ function simpleHash(str) {
 
 function getCacheKey(vid) {
   const d = VIDEO_DATA[vid];
-  return 'yt_score_' + vid + '_' + simpleHash(d.title + d.desc.slice(0, 500) + (d.tags || []).join(','));
+  return 'yt_score_v2_' + vid + '_' + simpleHash(d.title + d.desc + (d.tags || []).join(','));
 }
 
-function checkTimestamps(desc, durationSec) {
-  if (durationSec <= 180) return {score: null, tip: null};
-  const m = [...desc.matchAll(/\b(\d{1,2}):(\d{2})(?::(\d{2}))?\b/g)];
-  if (!m.length) return {score: 0, tip: '影片超過3分鐘，建議在說明中加入時間戳以提升觀眾體驗'};
-  const first = m[0];
-  const total = first[3] !== undefined
-    ? parseInt(first[1]) * 3600 + parseInt(first[2]) * 60 + parseInt(first[3])
-    : parseInt(first[1]) * 60 + parseInt(first[2]);
-  if (total !== 0) return {score: 5, tip: '第一個時間戳必須從 0:00（或 00:00、0:00:00）開始，才能觸發 YouTube 章節功能'};
-  return {score: 10, tip: null};
-}
-
-async function callGemini(title, desc, tags) {
+async function callGemini(title, desc, tags, durationSec) {
   const tagList = (tags || []);
   const tagDisplay = tagList.length > 0 ? tagList.join('、') : '（無）';
-  const prompt = `你是 YouTube 頻道內容品質評估專家，專門評估企業軟體教學影片的 AI 友善度。
+  const prompt = `你是 YouTube 頻道內容品質評估專家，專門評估 B2B 企業頻道影片（如產品介紹、解決方案、客戶案例、研討會或教學等）的SEO與觀眾體驗。
 
+影片長度：${Math.floor(durationSec / 60)}分${durationSec % 60}秒
 標題：${title}
-說明（前500字）：${desc.slice(0, 500)}
-標籤（共 ${tagList.length} 個，以下是完整清單，請勿假設清單以外的標籤存在）：${tagDisplay}
+說明：${desc}
+
+標籤（共 ${tagList.length} 個，請勿假設清單以外的標籤存在）：${tagDisplay}
+
+請綜合評估標題與說明，但給分與建議請分開。針對「時間戳」也要嚴格評估其品質。
 
 只回傳 JSON，不要其他文字：
-{"title_desc_score":數字,"title_desc_tip":"建議或null","tags_score":數字,"tags_tip":"建議或null"}
+{"title_score":數字,"title_tip":"建議或null","desc_score":數字,"desc_tip":"建議或null","tags_score":數字,"tags_tip":"建議或null","timestamps_score":數字,"timestamps_tip":"建議或null"}
 
 評分標準（嚴格）：
-- 標題＋說明（0~70分）：主題具體性、是否說明產品名稱／功能／使用情境、觀眾能否快速判斷值不值得看、AI 能否充分理解影片在教什麼
-- 標籤（0~20分）：只根據上方提供的實際標籤清單評分，與內容相關性、有無具體產品名與功能關鍵字、是否過於籠統或缺漏
+- 標題（0~30分）：是否具體、包含明確主題，觀眾能否快速判斷重點。
+- 說明（0~40分）：說明必須開門見山，直接點出影片的核心主題、方法與結論，而非用懸念或誘導語氣吸引點擊。評分重點：(1)前兩句是否直接說明影片在講什麼、解決什麼問題 (2)是否具體呈現關鍵資訊、做法或結論，讓不看影片也能掌握實質內容 (3)嚴格扣分：「精彩內容」「乾貨滿滿」「一起來了解」「不容錯過」等空洞引導語，或僅描述活動流程而不提供實質資訊。搜尋引擎與 AI 助理無法觀看影片，說明文字是它們理解內容的唯一依據。
+- 標籤（0~20分）：只根據提供的清單評分，與內容相關性、有無具體產品名與功能關鍵字。
+- 時間戳記（0~10分）：影片超過3分鐘建議要有時間戳。若有時間戳：(1)第一個必須從 0:00 或 00:00 開始 (2)只需標示起始時間，不應標示範圍結束時間 (3)描述必須具體，不可用「精彩內容/摘要/重點」等籠統詞 (4)描述不可過長，以免對UI不友善或無法觸發章節。違反上述請扣分並給具體建議。若小於3分鐘且無時間戳，請給滿分10分且 tip 為 null。
 
-tip 若無建議填 null，否則一句繁體中文改善建議。`;
+tip 若無建議填 null，否則給一句繁體中文具體改善建議。`;
 
   const res = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${geminiKey}`,
@@ -71,8 +65,10 @@ function scoreColor(s) {
 }
 
 function renderScore(vid, r) {
-  const tsScore = r.timestamps_score ?? 10;
-  const total = (r.title_desc_score || 0) + (r.tags_score || 0) + tsScore;
+  const tScore = r.title_score !== undefined ? r.title_score : Math.round((r.title_desc_score || 0) * (30/70));
+  const dScore = r.desc_score !== undefined ? r.desc_score : Math.round((r.title_desc_score || 0) * (40/70));
+  const tsScore = r.timestamps_score !== undefined ? r.timestamps_score : 10;
+  const total = tScore + dScore + (r.tags_score || 0) + tsScore;
   const card = document.querySelector(`.card[data-id="${vid}"]`);
   if (card) card.dataset.score = total;
 
@@ -85,11 +81,11 @@ function renderScore(vid, r) {
 
   const tips = document.getElementById('tips-' + vid);
   if (!tips) return;
-  const tsLabel = r.timestamps_score === null ? '不適用' : r.timestamps_score + ' / 10';
   const rows = [
-    ['標題＋說明', (r.title_desc_score || 0) + ' / 70', r.title_desc_tip],
+    ['標題', tScore + ' / 30', r.title_tip || (r.title_desc_tip ? `(標題/說明) ${r.title_desc_tip}` : null)],
+    ['說明', dScore + ' / 40', r.desc_tip || null],
     ['標籤', (r.tags_score || 0) + ' / 20', r.tags_tip],
-    ['時間戳', tsLabel, r.timestamps_tip],
+    ['時間戳', tsScore + ' / 10', r.timestamps_tip],
   ];
   tips.style.display = '';
   tips.innerHTML = `<div class="score-total" style="color:${scoreColor(total)}">綜合評分 ${total} / 100</div>`
@@ -119,17 +115,16 @@ async function analyzeVideo(vid) {
   btn.textContent = '分析中…';
   try {
     const d = VIDEO_DATA[vid];
-    const [geminiResult, tsResult] = await Promise.all([
-      callGemini(d.title, d.desc, d.tags),
-      Promise.resolve(checkTimestamps(d.desc, d.duration))
-    ]);
+    const geminiResult = await callGemini(d.title, d.desc, d.tags, d.duration);
     const result = {
-      title_desc_score: geminiResult.title_desc_score || 0,
-      title_desc_tip: geminiResult.title_desc_tip === 'null' ? null : geminiResult.title_desc_tip,
+      title_score: geminiResult.title_score || 0,
+      title_tip: geminiResult.title_tip === 'null' ? null : geminiResult.title_tip,
+      desc_score: geminiResult.desc_score || 0,
+      desc_tip: geminiResult.desc_tip === 'null' ? null : geminiResult.desc_tip,
       tags_score: geminiResult.tags_score || 0,
       tags_tip: geminiResult.tags_tip === 'null' ? null : geminiResult.tags_tip,
-      timestamps_score: tsResult.score,
-      timestamps_tip: tsResult.tip
+      timestamps_score: geminiResult.timestamps_score || 0,
+      timestamps_tip: geminiResult.timestamps_tip === 'null' ? null : geminiResult.timestamps_tip
     };
     localStorage.setItem(getCacheKey(vid), JSON.stringify(result));
     renderScore(vid, result);

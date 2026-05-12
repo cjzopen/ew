@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="nofollow, noindex">
+<title>影片引用推薦</title>
+<link rel="stylesheet" href="style.css">
+<style>.cite-input{width:100%;min-height:220px;padding:1rem 1.25rem;font-size:.9rem;font-family:var(--font);color:var(--text);background:#fff;border:1.5px solid rgba(0,0,0,.12);border-radius:var(--radius);resize:vertical;outline:none;transition:border-color .2s,box-shadow .2s;margin-bottom:1.5rem;&:focus{border-color:var(--link);box-shadow:0 0 0 3px color-mix(in srgb,var(--link) 15%,transparent)}}.rank-badge{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--text);color:#fff;font-size:.78rem;font-weight:700;flex-shrink:0;&.top{background:var(--link)}}.cite-reason{font-size:.875rem;color:var(--text-s);line-height:1.65;padding:.5rem 0 .25rem}.status-msg{text-align:center;padding:2.5rem 1rem;color:var(--text-s);font-size:.875rem}.empty{text-align:center;padding:3rem;color:var(--text-s)}</style>
+</head>
+<body>
+<div class="container">
+  <header class="page-header">
+    <h1>影片引用推薦</h1>
+    <p class="update-time">貼上文章全文，AI 推薦最適合引用的影片</p>
+  </header>
+
+  <div class="toolbar">
+    <div class="toolbar-group">
+      <span class="toolbar-label">Gemini</span>
+      <input class="api-key-input" id="geminiKey" type="password" placeholder="輸入 API Key" oninput="saveKey()">
+    </div>
+    <div class="toolbar-group">
+      <button class="analyze-btn" id="analyzeBtn" onclick="analyze()">開始分析</button>
+    </div>
+  </div>
+
+  <textarea class="cite-input" id="articleText" placeholder="貼上文章全文…"></textarea>
+
+  <div class="video-list" id="results"></div>
+</div>
+
+<script>
+const GEMINI_KEY_STORAGE = 'yt_gemini_key';
+
+function saveKey() {
+  localStorage.setItem(GEMINI_KEY_STORAGE, document.getElementById('geminiKey').value.trim());
+}
+
+function extractJson(text, start) {
+  let i = start, depth = 0, inStr = false, esc = false;
+  while (i < text.length) {
+    const c = text[i];
+    if (esc) { esc = false; }
+    else if (inStr) { if (c === '\\') esc = true; else if (c === '"') inStr = false; }
+    else if (c === '"') { inStr = true; }
+    else if (c === '{' || c === '[') { depth++; }
+    else if (c === '}' || c === ']') { if (--depth === 0) return text.slice(start, i + 1); }
+    i++;
+  }
+  return null;
+}
+
+async function loadVideos() {
+  const html = await (await fetch('./index.html')).text();
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const channelMap = {};
+  doc.querySelectorAll('.card[data-id]').forEach(c => { channelMap[c.dataset.id] = c.dataset.channel; });
+  const marker = 'VIDEO_DATA = ';
+  const start = html.indexOf(marker) + marker.length;
+  const raw = extractJson(html, start);
+  if (!raw) throw new Error('無法解析影片資料');
+  const data = JSON.parse(raw);
+  return Object.entries(data)
+    .filter(([id, v]) => channelMap[id] === '@DATASYStw' || /[一-鿿]/.test(v.title))
+    .map(([id, v]) => ({ id, title: v.title, desc: (v.desc || '').slice(0, 800) }));
+}
+
+async function callGemini(prompt, key) {
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${key}`,
+    { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: 'application/json', temperature: 0.5 } }) }
+  );
+  if (!res.ok) { const e = await res.json(); throw new Error(e.error?.message || 'Gemini API 錯誤'); }
+  const data = await res.json();
+  return JSON.parse(data.candidates[0].content.parts[0].text);
+}
+
+function setStatus(msg) {
+  document.getElementById('results').innerHTML = `<div class="status-msg">${msg}</div>`;
+}
+
+async function analyze() {
+  const key = document.getElementById('geminiKey').value.trim() || localStorage.getItem(GEMINI_KEY_STORAGE) || '';
+  if (!key) { alert('請先輸入 Gemini API Key'); return; }
+  const article = document.getElementById('articleText').value.trim();
+  if (!article) { alert('請貼上文章內容'); return; }
+
+  const btn = document.getElementById('analyzeBtn');
+  btn.disabled = true;
+  btn.textContent = '分析中…';
+
+  try {
+    setStatus('載入影片資料中…');
+    const videos = await loadVideos();
+
+    setStatus(`第一階段：從 ${videos.length} 部影片中篩選相關標題…`);
+    const titleList = videos.map((v, i) => `${i + 1}. [${v.id}] ${v.title}`).join('\n');
+    const candidates = await callGemini(
+      `你是內容推薦專家。請從以下影片標題中，選出 5 到 8 部最可能與文章相關、適合引用的影片。\n\n文章全文：\n${article.slice(0, 4000)}\n\n影片標題：\n${titleList}\n\n只回傳 JSON 陣列，格式：["video_id_1","video_id_2",...]`,
+      key
+    );
+
+    const pool = videos.filter(v => candidates.includes(v.id));
+    if (!pool.length) { setStatus('第一階段未篩選出候選影片，請嘗試修改文章內容'); return; }
+
+    setStatus(`第二階段：深度分析 ${pool.length} 部候選影片…`);
+    const details = pool.map(v => `[${v.id}]\n標題：${v.title}\n說明：${v.desc}`).join('\n\n---\n\n');
+    const ranked = await callGemini(
+      `你是內容推薦專家。請分析哪些影片最適合在文章中引用，依相關性由高到低排列，並以繁體中文說明推薦理由（一到兩句話）。與文章無關的影片不須列入。\n\n文章全文：\n${article.slice(0, 4000)}\n\n影片資料：\n${details}\n\n只回傳 JSON 陣列，格式：[{"id":"video_id","reason":"推薦理由"},...]`,
+      key
+    );
+
+    renderResults(ranked, videos);
+  } catch (e) {
+    setStatus('分析失敗：' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '開始分析';
+  }
+}
+
+function renderResults(ranked, videos) {
+  const map = Object.fromEntries(videos.map(v => [v.id, v]));
+  const el = document.getElementById('results');
+  if (!ranked.length) { el.innerHTML = '<div class="empty">找不到相關影片</div>'; return; }
+  el.innerHTML = ranked.map((r, i) => {
+    const v = map[r.id];
+    if (!v) return '';
+    return `<div class="card">
+  <div class="card-header">
+    <span class="rank-badge${i === 0 ? ' top' : ''}">${i + 1}</span>
+    <h2 class="card-title"><a href="https://www.youtube.com/watch?v=${v.id}" target="_blank">${v.title}</a></h2>
+  </div>
+  <p class="cite-reason">${r.reason}</p>
+</div>`;
+  }).join('');
+}
+
+(function init() {
+  const saved = localStorage.getItem(GEMINI_KEY_STORAGE);
+  if (saved) document.getElementById('geminiKey').value = saved;
+})();
+</script>
+</body>
+</html>
