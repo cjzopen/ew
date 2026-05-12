@@ -6,7 +6,7 @@
 <meta name="robots" content="nofollow, noindex">
 <title>影片引用推薦</title>
 <link rel="stylesheet" href="style.css">
-<style>.cite-input{width:100%;min-height:220px;padding:1rem 1.25rem;font-size:.9rem;font-family:var(--font);color:var(--text);background:#fff;border:1.5px solid rgba(0,0,0,.12);border-radius:var(--radius);resize:vertical;outline:none;transition:border-color .2s,box-shadow .2s;margin-bottom:1.5rem;&:focus{border-color:var(--link);box-shadow:0 0 0 3px color-mix(in srgb,var(--link) 15%,transparent)}}.rank-badge{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--text);color:#fff;font-size:.78rem;font-weight:700;flex-shrink:0;&.top{background:var(--link)}}.cite-reason{font-size:.875rem;color:var(--text-s);line-height:1.65;padding:.5rem 0 .25rem}.status-msg{text-align:center;padding:2.5rem 1rem;color:var(--text-s);font-size:.875rem}.empty{text-align:center;padding:3rem;color:var(--text-s)}</style>
+<style>.cite-input{width:100%;min-height:220px;padding:1rem 1.25rem;font-size:.9rem;font-family:var(--font);color:var(--text);background:#fff;border:1.5px solid rgba(0,0,0,.12);border-radius:var(--radius);resize:vertical;outline:none;transition:border-color .2s,box-shadow .2s;margin-bottom:1.5rem;&:focus{border-color:var(--link);box-shadow:0 0 0 3px color-mix(in srgb,var(--link) 15%,transparent)}}.rank-badge{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--text);color:#fff;font-size:.78rem;font-weight:700;flex-shrink:0;&.top{background:var(--link)}}.cite-reason{font-size:.875rem;color:var(--text-s);line-height:1.65;padding:.5rem 0 .25rem}.status-msg{text-align:center;padding:2.5rem 1rem;color:var(--text-s);font-size:.875rem}.empty{text-align:center;padding:3rem;color:var(--text-s)}.cite-btn{background:transparent;color:var(--link);border:1.5px solid var(--link);border-radius:980px;padding:5px 14px;font-size:.78rem;font-weight:600;font-family:var(--font);cursor:pointer;transition:background .2s,color .2s;white-space:nowrap;&:hover{background:var(--link);color:#fff}}</style>
 </head>
 <body>
 <div class="container">
@@ -121,6 +121,14 @@ async function analyze() {
   }
 }
 
+async function copyEmbed(btn, id, title) {
+  const safeTitle = title.replace(/"/g, '&quot;');
+  const code = `<iframe loading="lazy" width="560" height="315" src="https://www.youtube.com/embed/${id}?si=" title="${safeTitle}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
+  await navigator.clipboard.writeText(code);
+  btn.textContent = '已複製';
+  setTimeout(() => { btn.textContent = '引用'; }, 3000);
+}
+
 function renderResults(ranked, videos) {
   const map = Object.fromEntries(videos.map(v => [v.id, v]));
   const el = document.getElementById('results');
@@ -134,6 +142,7 @@ function renderResults(ranked, videos) {
     <h2 class="card-title"><a href="https://www.youtube.com/watch?v=${v.id}" target="_blank">${v.title}</a></h2>
   </div>
   <p class="cite-reason">${r.reason}</p>
+  <div class="card-footer"><button class="cite-btn" onclick="copyEmbed(this,'${v.id}',${JSON.stringify(v.title)})">引用</button></div>
 </div>`;
   }).join('');
 }
