@@ -124,7 +124,12 @@ async function analyze() {
 async function copyEmbed(btn, id, title) {
   const safeTitle = title.replace(/"/g, '&quot;');
   const code = `<iframe loading="lazy" width="560" height="315" src="https://www.youtube.com/embed/${id}?si=" title="${safeTitle}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
-  await navigator.clipboard.writeText(code);
+  try {
+    await navigator.clipboard.writeText(code);
+  } catch {
+    const ta = Object.assign(document.createElement('textarea'), { value: code, style: 'position:fixed;opacity:0' });
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+  }
   btn.textContent = '已複製';
   setTimeout(() => { btn.textContent = '引用'; }, 3000);
 }
@@ -142,7 +147,7 @@ function renderResults(ranked, videos) {
     <h2 class="card-title"><a href="https://www.youtube.com/watch?v=${v.id}" target="_blank">${v.title}</a></h2>
   </div>
   <p class="cite-reason">${r.reason}</p>
-  <div class="card-footer"><button class="cite-btn" onclick="copyEmbed(this,'${v.id}',${JSON.stringify(v.title)})">引用</button></div>
+  <div class="card-footer"><button class="cite-btn" onclick="copyEmbed(this,'${v.id}',${JSON.stringify(v.title).replace(/"/g,'&quot;')})">引用</button></div>
 </div>`;
   }).join('');
 }
